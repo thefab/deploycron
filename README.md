@@ -12,7 +12,7 @@ pip install deploycron
 
 # Usage
 
-There's only one function in the package now,
+There are two functions in the package now,
 
 ```python
 def deploycron(filename="", content="", override=False):
@@ -42,6 +42,20 @@ deploycron(content="* * * * * echo hello > /tmp/hello")
 # if you want to overwrite the existing crontab, set `override` to True
 deploycron(content="* * * * * echo hello > /tmp/hello", override=True)
 ```
+
+and 
+
+```python
+def undeploycron_between(start_line, stop_line):
+```
+
+> Uninstall crontab parts between two lines (included).
+> If the start_line or the stop_line is not found into the installed crontab,
+> it won't be modified.
+>
+>
+> `start_line` - start line to delimit the crontab block to remove
+> `stop_line` - stop line to delimit the crontab block to remove
 
 ## Note
 
