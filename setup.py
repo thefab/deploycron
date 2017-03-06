@@ -17,4 +17,10 @@ setup(
         "Topic :: Utilities",
         "License :: OSI Approved :: MIT License",
     ],
+    entry_points = {
+        "console_scripts": [
+            "deploycron_file = deploycron.cli_deploycron_file:main",
+            "undeploycron_between = deploycron.cli_undeploycron_between:main"
+        ]
+    }
 )
