@@ -57,11 +57,38 @@ def undeploycron_between(start_line, stop_line):
 > `start_line` - start line to delimit the crontab block to remove
 > `stop_line` - stop line to delimit the crontab block to remove
 
+## CLI scripts
+
+The package also provides two helpers CLI scripts mapped to corresponding functions:
+
+```
+usage: deploycron_file [-h] filepath
+
+positional arguments:
+  filepath    Complete file path of the cron to deploy
+
+optional arguments:
+  -h, --help  show this help message and exit
+```
+
+and
+
+```
+usage: undeploycron_between [-h] start_line stop_line
+
+positional arguments:
+  start_line  start line to delimit the crontab block to remove
+  stop_line   stop line to delimit the crontab block to remove
+
+optional arguments:
+  -h, --help  show this help message and exit
+```
+
 ## Note
 
 Only support in unix-like system, eg. Linux/Mac
 
-## Author
+## Authors
 
 * Monklof (monklof@gmail.com)
 
