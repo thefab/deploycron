@@ -27,6 +27,7 @@ def deploycron(filename="", content="", override=False):
         installed_content = ""
     else:
         installed_content = _get_installed_content()
+        installed_content = installed_content.rstrip("\n")
     installed_crontabs = installed_content.split("\n")
     for crontab in content.split("\n"):
         if crontab and crontab not in installed_crontabs:
@@ -37,9 +38,7 @@ def deploycron(filename="", content="", override=False):
     if installed_content:
         installed_content += "\n"
     # install back
-    retcode, err, out = _runcmd("crontab", installed_content)
-    if retcode != 0:
-        raise ValueError("failed to install crontab, check if crontab is valid")
+    _install_content(installed_content)
 
 def undeploycron_between(start_line, stop_line):
     """uninstall crontab parts between two lines (included).
@@ -48,36 +47,43 @@ def undeploycron_between(start_line, stop_line):
     start_line - start line to delimit the crontab block to remove
     stop_line - stop line to delimit the crontab block to remove
     """
-    installed_content = _get_installed_content()
-    if start_line not in installed_content:
+    lines_installed = [x.strip() for x in _get_installed_content().splitlines()]
+    start_line = start_line.strip()
+    stop_line = stop_line.strip()
+    if start_line not in lines_installed:
         return False
-    if stop_line not in installed_content:
+    if stop_line not in lines_installed:
         return False
     between = False
-    installed_crontabs = []
-    for crontab in installed_content.split("\n"):
-        if not between and start_line.strip() in crontab:
+    lines_to_install = []
+    for cronline in lines_installed:
+        if not between and start_line == cronline:
             between = True
-        elif between and stop_line.strip() in crontab:
+        elif between and stop_line == cronline:
             between = False
         else:
             if not between:
-                installed_crontabs.append(crontab)
-        print crontab, between, installed_crontabs
-    if len(installed_crontabs) > 0:
-        installed_crontabs.append("")
-    installed_content = "\n".join(installed_crontabs)
-    retcode, err, out = _runcmd("crontab", installed_content)
-    if retcode != 0:
-        raise ValueError("failed to install crontab, check if crontab is valid")
+                lines_to_install.append(cronline)
+    if len(lines_to_install) > 0:
+        lines_to_install.append("")
+    content_to_install = "\n".join(lines_to_install)
+    _install_content(content_to_install)
     return True
 
 def _get_installed_content():
+    """get the current installed crontab.
+    """
     retcode, err, installed_content = _runcmd("crontab -l")
     if retcode != 0 and 'no crontab for' not in err:
         raise OSError("crontab not supported in your system")
-    installed_content = installed_content.rstrip("\n")
     return installed_content
+
+def _install_content(content):
+    """install (replace) the given (multilines) string as new crontab...
+    """
+    retcode, err, out = _runcmd("crontab", content)
+    if retcode != 0:
+        raise ValueError("failed to install crontab, check if crontab is valid")
 
 def _runcmd(cmd, input=None):
     '''run shell command and return the a tuple of the cmd's return code, std error and std out
