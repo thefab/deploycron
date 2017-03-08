@@ -4,7 +4,7 @@ python:
     - "3.5"
 install:
     - pip install -r test-requirements.txt
-    - python setup.py
+    - python setup.py develop
 script: make coveralls
 notifications:
     email: florian.pourtugau@hotmail.fr
