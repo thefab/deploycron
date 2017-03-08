@@ -1,6 +1,11 @@
 import os
 from setuptools import setup
 
+with open('pip-requirements.txt') as reqs:
+    install_requires = [
+        line for line in reqs.read().split('\n')
+    ]
+
 setup(
     name = "deploycron",
     version = "0.0.1",
@@ -12,6 +17,7 @@ setup(
     url = "https://github.com/monklof/deploycron",
     packages=['deploycron', 'tests'],
     test_suite = 'nose.collector',
+    install_requires=install_requires,
     classifiers=[
         "Development Status :: 2 - Pre-Alpha",
         "Topic :: Utilities",
