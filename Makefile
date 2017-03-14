@@ -9,7 +9,7 @@ tinstall:
 	python setup.py develop
 	
 coveralls:
-	cd ./tests && nosetests --with-coverage --cover-package=deploycron
+	cd ./tests && nosetests --exe --with-coverage --cover-package=deploycron
 
 coverage:
-	cd tests && coverage run `which nosetests` && coverage html --include='*/Github_peloycron/deploycron/*' --omit='test_*'
+	cd ./tests && coverage run `which nosetests` --exe && coverage html --include='*/Github_peloycron/deploycron/*' --omit='test_*'
