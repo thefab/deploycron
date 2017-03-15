@@ -10,13 +10,14 @@ import deploycron
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("filepath", help="Complete file path of the cron to deploy")
+    parser.add_argument("filepath",
+                        help="Complete file path of the cron to deploy")
     args = parser.parse_args()
     filepath = args.filepath
     if not os.path.isfile(filepath):
         print("ERROR: filepath [%s] is not a file" % filepath, file=sys.stderr)
         sys.exit(1)
-    deploycron.deploycron(filename=filepath)    
+    deploycron.deploycron(filename=filepath)
 
 
 if __name__ == "__main__":
