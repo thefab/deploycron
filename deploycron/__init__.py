@@ -78,7 +78,7 @@ def _get_installed_content():
     """get the current installed crontab.
     """
     retcode, err, installed_content = _runcmd("crontab -l")
-    if retcode != 0 and 'no crontab for' not in err:
+    if retcode != 0 and b'no crontab for' not in err:
         raise OSError("crontab not supported in your system")
     return installed_content.decode("utf-8")
 
