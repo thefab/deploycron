@@ -3,10 +3,11 @@
 import subprocess
 import os
 
+
 def deploycron(filename="", content="", override=False):
     """install crontabs into the system if it's not installed.
-    This will not remove the other crontabs installed in the system if not specified
-    as override. It just merge the new one with the existing one. 
+    This will not remove the other crontabs installed in the system if not
+    specified as override. It just merge the new one with the existing one.
     If you provide `filename`, then will install the crontabs in that file
     otherwise install crontabs specified in content
 
@@ -40,6 +41,7 @@ def deploycron(filename="", content="", override=False):
     # install back
     _install_content(installed_content)
 
+
 def undeploycron_between(start_line, stop_line):
     """uninstall crontab parts between two lines (included).
     If the start_line or the stop_line is not found into the installed crontab,
@@ -47,7 +49,8 @@ def undeploycron_between(start_line, stop_line):
     start_line - start line to delimit the crontab block to remove
     stop_line - stop line to delimit the crontab block to remove
     """
-    lines_installed = [x.strip() for x in _get_installed_content().splitlines()]
+    lines_installed = [x.strip() for x in
+                       _get_installed_content().splitlines()]
     start_line = start_line.strip()
     stop_line = stop_line.strip()
     if start_line not in lines_installed:
@@ -70,31 +73,37 @@ def undeploycron_between(start_line, stop_line):
     _install_content(content_to_install)
     return True
 
+
 def _get_installed_content():
     """get the current installed crontab.
     """
     retcode, err, installed_content = _runcmd("crontab -l")
     if retcode != 0 and 'no crontab for' not in err:
         raise OSError("crontab not supported in your system")
-    return installed_content
+    return installed_content.decode("utf-8")
+
 
 def _install_content(content):
     """install (replace) the given (multilines) string as new crontab...
     """
     retcode, err, out = _runcmd("crontab", content)
     if retcode != 0:
-        raise ValueError("failed to install crontab, check if crontab is valid")
+        raise ValueError("failed to install crontab, check if crontab is "
+                         "valid")
+
 
 def _runcmd(cmd, input=None):
-    '''run shell command and return the a tuple of the cmd's return code, std error and std out
-    WARN: DO NOT RUN COMMANDS THAT NEED TO INTERACT WITH STDIN WITHOUT SPECIFY INPUT,
-         (eg cat), IT WILL NEVER TERMINATE.
+    '''run shell command and return the a tuple of the cmd's return code, std
+    error and std out.
+    WARN: DO NOT RUN COMMANDS THAT NEED TO INTERACT WITH STDIN WITHOUT SPECIFY
+    INPUT, (eg cat), IT WILL NEVER TERMINATE.
     '''
 
     if input is not None:
         p = subprocess.Popen(cmd, shell=True, stdin=subprocess.PIPE,
                              stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                              close_fds=True, preexec_fn=os.setsid)
+        input = input.encode()
     else:
         p = subprocess.Popen(cmd, shell=True,
                              stdout=subprocess.PIPE, stderr=subprocess.PIPE,
@@ -102,5 +111,3 @@ def _runcmd(cmd, input=None):
 
     stdoutdata, stderrdata = p.communicate(input)
     return p.returncode, stderrdata, stdoutdata
-
-

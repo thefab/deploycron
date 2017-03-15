@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import os
 from setuptools import setup
 
 with open('pip-requirements.txt') as reqs:
@@ -10,11 +9,11 @@ with open('pip-requirements.txt') as reqs:
     ]
 
 setup(
-    name = "deploycron",
-    version = "0.0.1",
-    author = "monklof",
-    author_email = "monklof@gmail.com",
-    description = ("a small crontab deploy/install tool for python"),
+    name="deploycron",
+    version="0.0.1",
+    author="monklof",
+    author_email="monklof@gmail.com",
+    description=("a small crontab deploy/install tool for python"),
     license = "MIT",
     keywords = "crontab, cron, initialize",
     url = "https://github.com/monklof/deploycron",

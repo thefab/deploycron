@@ -1,4 +1,5 @@
 test:
+	flake8 ./
 	cd ./tests && nosetests --exe
 
 install:
