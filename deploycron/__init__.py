@@ -26,11 +26,7 @@ def deploycron(filename="", content="", override=False):
     if override:
         installed_content = ""
     else:
-        # currently installed crontabs
-        retcode, err, installed_content = _runcmd("crontab -l")
-        if retcode != 0 and 'no crontab for' not in err:
-            raise OSError("crontab not supported in your system")
-        # merge the new crontab with the old one
+        installed_content = _get_installed_content()
         installed_content = installed_content.rstrip("\n")
     installed_crontabs = installed_content.split("\n")
     for crontab in content.split("\n"):
@@ -42,9 +38,86 @@ def deploycron(filename="", content="", override=False):
     if installed_content:
         installed_content += "\n"
     # install back
-    retcode, err, out = _runcmd("crontab", installed_content)
+    _install_content(installed_content)
+
+
+def undeploycron_between(start_line, stop_line, occur_start=1, occur_stop=1):
+    """uninstall crontab parts between two lines (included).
+    If the start_line or the stop_line is not found into the installed crontab,
+    it won't be modified.
+    `start_line` - start crontab line (the actual line, not the line number)
+    to delimit the crontab block to remove
+    `stop_line` - stop crontab line (the actual line, not the line number)
+    to delimit the crontab block to remove
+    `occur_start` - nth occurence you want to consider as start_line (ex :
+    choose 2 if you want the 2nd occurence to be chosen as start_line)
+    `occur_stop` - nth occurence you want to consider as stop_line (ex :
+    choose 2 if you want the 2nd occurence to be chosen as stop_line)
+    """
+    lines_installed = [x.strip() for x in
+                       _get_installed_content().splitlines()]
+    start_line = start_line.strip()
+    stop_line = stop_line.strip()
+    if start_line not in lines_installed:
+        return False
+    if stop_line not in lines_installed:
+        return False
+    if occur_start is None or occur_start <= 0:
+        return False
+    if occur_stop is None or occur_stop <= 0:
+        return False
+
+    # Check if stop_line is before start_line by getting their indices
+    index_start = -1
+    index_stop = -1
+    try:
+        # Find the occurence we are interested in
+        for j in range(occur_start):
+            index_start = lines_installed.index(start_line, index_start + 1)
+    except ValueError:
+        # If the occurence number is too high (nth occurrence not found)
+        return False
+    try:
+        for j in range(occur_stop):
+            index_stop = lines_installed.index(stop_line, index_stop + 1)
+    except ValueError:
+        return False
+
+    # If stop is before start, we switch them
+    if index_stop < index_start:
+        buffer_var = index_start
+        index_start = index_stop
+        index_stop = buffer_var
+
+    lines_to_install = []
+    for i in range(len(lines_installed)):
+        if i < index_start or i > index_stop:
+            lines_to_install.append(lines_installed[i])
+
+    if len(lines_to_install) > 0:
+        lines_to_install.append("")
+    content_to_install = "\n".join(lines_to_install)
+    _install_content(content_to_install)
+    return True
+
+
+def _get_installed_content():
+    """get the current installed crontab.
+    """
+    retcode, err, installed_content = _runcmd("crontab -l")
+    if retcode != 0 and b'no crontab for' not in err:
+        raise OSError("crontab not supported in your system")
+    return installed_content.decode("utf-8")
+
+
+def _install_content(content):
+    """install (replace) the given (multilines) string as new crontab...
+    """
+    retcode, err, out = _runcmd("crontab", content)
     if retcode != 0:
-        raise ValueError("failed to install crontab, check if crontab is valid")
+        raise ValueError("failed to install crontab, check if crontab is "
+                         "valid")
+
 
 def _runcmd(cmd, input=None):
     '''run shell command and return the a tuple of the cmd's return code, std error and std out

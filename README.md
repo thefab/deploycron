@@ -12,7 +12,7 @@ pip install deploycron
 
 # Usage
 
-There's only one function in the package now,
+There are two functions in the package now,
 
 ```python
 def deploycron(filename="", content="", override=False):
@@ -41,6 +41,123 @@ deploycron(content="* * * * * echo hello > /tmp/hello")
 
 # if you want to overwrite the existing crontab, set `override` to True
 deploycron(content="* * * * * echo hello > /tmp/hello", override=True)
+```
+
+and 
+
+```python
+def undeploycron_between(start_line, stop_line, occur_start, occur_stop):
+```
+
+> Uninstall crontab parts between two lines (included).
+> If the start_line or the stop_line is not found into the installed crontab,
+> it won't be modified.
+> Returns `True` if the operation succeded and `False` if the operation failed.
+>
+>
+> `start_line` - start crontab line (the actual line, not the line number) to delimit the crontab block to remove  
+> `stop_line` - stop crontab line (the actual line, not the line number) to delimit the crontab block to remove  
+> `occur_start` - number of the occurrence of `start_line` at which the uninstall will start (1 => first occurrence)  
+> `occur_start` - number of the occurrence of `stop_line` at which the uninstall will stop  
+
+Example 1:
+```python
+from deploycron import deploycron
+
+# Crontab sample
+deploycron(content="* * * * * echo Good > /tmp/buffer")
+deploycron(content="* * * * * echo day > /tmp/buffer")
+deploycron(content="* * * * * echo to > /tmp/buffer")
+deploycron(content="* * * * * echo you > /tmp/buffer")
+deploycron(content="* * * * * echo mate > /tmp/buffer")
+
+# We want to remove from line 2 to line 4 included
+undeploycron_between("* * * * * echo day > /tmp/buffer",
+                     "* * * * * echo mate > /tmp/buffer")
+```
+
+With this script, we first get a crontab like this one :
+
+    * * * * * echo Good > /tmp/buffer
+    * * * * * echo day > /tmp/buffer
+    * * * * * echo to > /tmp/buffer
+    * * * * * echo you > /tmp/buffer
+    * * * * * echo mate > /tmp/buffer
+    
+And then, after the undeploycron_between(), we get :
+
+    * * * * * echo Good > /tmp/buffer
+    * * * * * echo mate > /tmp/buffer
+
+Example 2:
+```python
+from deploycron import deploycron
+
+# Crontab sample
+deploycron(content="* * * * * echo Good > /tmp/buffer")
+deploycron(content="* * * * * echo day > /tmp/buffer")
+deploycron(content="* * * * * echo to > /tmp/buffer")
+deploycron(content="* * * * * echo you > /tmp/buffer")
+deploycron(content="* * * * * echo mate > /tmp/buffer")
+deploycron(content="* * * * * echo Good > /tmp/buffer")
+deploycron(content="* * * * * echo to > /tmp/buffer")
+deploycron(content="* * * * * echo see > /tmp/buffer")
+deploycron(content="* * * * * echo you > /tmp/buffer")
+
+# We want to remove from line 6 to line 9 included
+undeploycron_between("* * * * * echo Good > /tmp/buffer",
+                     "* * * * * echo you > /tmp/buffer",
+                     2,
+                     2)
+```
+
+This script allows us to go from this crontab :
+
+    * * * * * echo Good > /tmp/buffer
+    * * * * * echo day > /tmp/buffer
+    * * * * * echo to > /tmp/buffer
+    * * * * * echo you > /tmp/buffer
+    * * * * * echo mate > /tmp/buffer
+    * * * * * echo Good > /tmp/buffer
+    * * * * * echo to > /tmp/buffer
+    * * * * * echo see > /tmp/buffer
+    * * * * * echo you > /tmp/buffer
+
+To this one :
+
+    * * * * * echo Good > /tmp/buffer
+    * * * * * echo day > /tmp/buffer
+    * * * * * echo to > /tmp/buffer
+    * * * * * echo you > /tmp/buffer
+    * * * * * echo mate > /tmp/buffer
+
+The undeploy doesn't trigger at the first occurrence of the lines here. Instead, it triggers at the second occurrence of both `start_line` and `stop_line` as precised in the parameters.
+
+## CLI scripts
+
+The package also provides two helpers CLI scripts mapped to corresponding functions:
+
+```
+usage: deploycron_file [-h] filepath
+
+positional arguments:
+  filepath    Complete file path of the cron to deploy
+
+optional arguments:
+  -h, --help  show this help message and exit
+```
+
+and
+
+```
+usage: undeploycron_between [-h] start_line stop_line
+
+positional arguments:
+  start_line  start line to delimit the crontab block to remove
+  stop_line   stop line to delimit the crontab block to remove
+
+optional arguments:
+  -h, --help  show this help message and exit
 ```
 
 ## Note
