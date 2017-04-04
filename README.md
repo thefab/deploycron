@@ -33,7 +33,7 @@ Example:
 ```python
 from deploycron import deploycron
 
-# specify a filenmae
+# specify a filename
 deploycron(filename="/tmp/youcrontab.tab")
 
 # or just specify crontab content

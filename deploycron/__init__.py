@@ -3,10 +3,11 @@
 import subprocess
 import os
 
+
 def deploycron(filename="", content="", override=False):
     """install crontabs into the system if it's not installed.
-    This will not remove the other crontabs installed in the system if not specified
-    as override. It just merge the new one with the existing one. 
+    This will not remove the other crontabs installed in the system if not
+    specified as override. It just merge the new one with the existing one.
     If you provide `filename`, then will install the crontabs in that file
     otherwise install crontabs specified in content
 
@@ -120,15 +121,17 @@ def _install_content(content):
 
 
 def _runcmd(cmd, input=None):
-    '''run shell command and return the a tuple of the cmd's return code, std error and std out
-    WARN: DO NOT RUN COMMANDS THAT NEED TO INTERACT WITH STDIN WITHOUT SPECIFY INPUT,
-         (eg cat), IT WILL NEVER TERMINATE.
+    '''run shell command and return the a tuple of the cmd's return code, std
+    error and std out.
+    WARN: DO NOT RUN COMMANDS THAT NEED TO INTERACT WITH STDIN WITHOUT SPECIFY
+    INPUT, (eg cat), IT WILL NEVER TERMINATE.
     '''
 
     if input is not None:
         p = subprocess.Popen(cmd, shell=True, stdin=subprocess.PIPE,
                              stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                              close_fds=True, preexec_fn=os.setsid)
+        input = input.encode()
     else:
         p = subprocess.Popen(cmd, shell=True,
                              stdout=subprocess.PIPE, stderr=subprocess.PIPE,
@@ -136,5 +139,3 @@ def _runcmd(cmd, input=None):
 
     stdoutdata, stderrdata = p.communicate(input)
     return p.returncode, stderrdata, stdoutdata
-
-
